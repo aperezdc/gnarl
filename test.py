@@ -253,6 +253,87 @@ class TestSchemed(unittest.TestCase):
         origin_3d = Point(x=0.0, y=0.0, z=0.0)
         self.assertTrue(hasattr(origin_3d, "z"))
 
+    def test_validate_non_dict(self):
+        class Point(Schemed):
+            __schema__ = { "x": float, "y": float }
+        with self.assertRaises(ValueError):
+            value = Point.validate("foobar")
+
+    def test_set_non_schema_key(self):
+        class Point(Schemed):
+            __schema__ = { "x": float, "y": float }
+        value = Point(x=1.1, y=2.2)
+        value._description = "A 2D point"
+        self.assertListEqual(["x", "y"], list(sorted(value.keys())))
+
+    def test_set_field(self):
+        class Point(Schemed):
+            __schema__ = { "x": float, "y": float }
+        value = Point(x=1.1, y=2.2)
+        value.x = 2.5
+        self.assertEqual(2.5, value.x)
+        self.assertEqual(2.2, value.y)
+
+    def test_set_field_invalid_value(self):
+        class Point(Schemed):
+            __schema__ = { "x": float, "y": float }
+        value = Point(x=1.1, y=2.2)
+        with self.assertRaises(SchemaError):
+            value.x = "invalid type"
+        # Original values must be unchanged
+        self.assertEqual(1.1, value.x)
+        self.assertEqual(2.2, value.y)
+
+    def test_set_optional_field(self):
+        class Point(Schemed):
+            __schema__ = { "x": float, "y": float, Optional("z"): float }
+        value = Point(x=1.1, y=2.2)
+        self.assertFalse(hasattr(value, "z"))
+        value.z = 3.3
+        self.assertTrue(hasattr(value, "z"))
+        self.assertEqual(3.3, value.z)
+
+    def test_update(self):
+        class Point(Schemed):
+            __schema__ = { "x": float, "y": float, Optional("z"): float }
+        value = Point(x=1.1, y=2.2)
+
+        # Update using keyword arguments
+        value.update(x=4.5)
+        self.assertEqual(4.5, value.x)
+        self.assertEqual(2.2, value.y)
+        # Update multiple values using keyword arguments
+        value.update(x=0.0, y=-2.5)
+        self.assertEqual(0.0, value.x)
+        self.assertEqual(-2.5, value.y)
+        # Update using a dicionary
+        value.update({"x" : 42.0})
+        self.assertEqual(42.0, value.x)
+        self.assertEqual(-2.5, value.y)
+        # Update using dictionary and keywords
+        value.update({"x": 0.0}, y=1.1)
+        self.assertEqual(0.0, value.x)
+        self.assertEqual(1.1, value.y)
+        # Update the same attribute using dictionary _and_ keywords, the
+        # latter should take precedence.
+        value.update({"y": 5.0}, y=7.7)
+        self.assertEqual(0.0, value.x)
+        self.assertEqual(7.7, value.y)
+        # Update an optional schema field
+        value.update(z=9.9)
+        self.assertEqual(0.0, value.x)
+        self.assertEqual(7.7, value.y)
+        self.assertEqual(9.9, value.z)
+
+    def test_update_invalid_value(self):
+        class Point(Schemed):
+            __schema__ = { "x": float, "y": float }
+        origin = Point(x=0.0, y=0.0)
+        with self.assertRaises(SchemaError):
+            origin.update(x="invalid type")
+        self.assertEqual(0.0, origin.x)
+        self.assertEqual(0.0, origin.y)
+
     def test_instantiate_wrong_value_type(self):
         class Point(Schemed):
             __schema__ = { "x": float, "y": float }
@@ -270,6 +351,12 @@ class TestSchemed(unittest.TestCase):
             __schema__ = { "x": float, "y": float }
         with self.assertRaises(SchemaError):
             origin = Point(x=0.0, y=0.0, z="OUCH")
+
+    def test_schema_keys(self):
+        class Point(Schemed):
+            __schema__ = { "x": float, "y": float }
+        value = Point(x=1.1, y=2.2)
+        self.assertListEqual(["x", "y"], list(sorted(value.keys())))
 
     def test_schema_iter(self):
         class Point(Schemed):
