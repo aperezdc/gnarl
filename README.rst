@@ -2,6 +2,10 @@
  Lightweight Annotated Schema Serializable Objects
 ===================================================
 
+.. image:: https://readthedocs.org/projects/lasso/badge/?version=latest
+   :target: https://lasso.readthedocs.org/en/latest
+   :alt: Documentation Status
+
 .. image:: https://img.shields.io/travis/aperezdc/lasso-python.svg?style=flat
    :target: https://travis-ci.org/aperezdc/lasso-python
    :alt: Build Status
@@ -84,9 +88,13 @@ directly from the Git repository::
 Documentation
 =============
 
-There us no documentation for now. In the meanwhile, please read the source
-code of the module itself, or even better, that of `projects using the
-module`__.
+The documentation for Lasso |lasso-icon| is available at:
+
+  http://lasso.readthedocs.org/en/latest
+
+Note that the documentation is work in progress. In the meanwhile, you may
+want to read the source code of the module itself for additional insight,
+or even better, the code of `projects using the module`__.
 
 __ users_
 
