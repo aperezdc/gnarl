@@ -10,6 +10,21 @@
    :target: https://coveralls.io/r/aperezdc/lasso-python?branch=master
    :alt: Code Coverage
 
+.. |lasso-icon| image:: http://tango.freedesktop.org/static/cvs/tango-art-libre/22x22/tools/select-lasso.png
+
+Lasso |lasso-icon| is a small module for `Python <http://python.org>`_ which
+allows defining classes with type-checked attributes, conforming to a
+predetermined schema.
+
+Classes with Lasso |lasso-icon| schemas can be used to:
+
+* **Type-check** object attributes.
+* **Validate** input data.
+* **Deserialize** input data to application objects, with direct support for
+  deserializing `JSON <http://json.org>`_.
+* **Serialize** application objects to JSON_.
+
+
 Usage
 =====
 
