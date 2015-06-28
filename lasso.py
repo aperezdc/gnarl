@@ -169,7 +169,8 @@ class Schemed(JSONable, metaclass=_SchemedMeta):
         return object.__getattribute__(self, "_data")
 
     def __iter__(self):
-        return object.__getattribute__(self, "_data").items()
+        return ((k, v) for (k, v)
+                in object.__getattribute__(self, "_data").items())
 
     def keys(self):
         return self._data.keys()

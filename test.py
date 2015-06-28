@@ -208,7 +208,7 @@ class TestTimestamp(unittest.TestCase):
         self.assertEqual(data, now)
 
 
-class TestSchemaShape(unittest.TestCase):
+class TestSchemed(unittest.TestCase):
     def test_schema_automatic_creation(self):
         """
         Checks whether the __schema__ class attribute is automatically turned
@@ -270,6 +270,15 @@ class TestSchemaShape(unittest.TestCase):
             __schema__ = { "x": float, "y": float }
         with self.assertRaises(SchemaError):
             origin = Point(x=0.0, y=0.0, z="OUCH")
+
+    def test_schema_iter(self):
+        class Point(Schemed):
+            __schema__ = { "x": float, "y": float }
+        value = Point(x=1.1, y=2.2)
+        items = {}
+        for k, v in value:
+            items[k] = v
+        self.assertDictEqual({"x": 1.1, "y": 2.2}, items)
 
 
 class ListValue(Schemed):
