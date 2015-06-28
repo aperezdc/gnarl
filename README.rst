@@ -66,3 +66,53 @@ Last, but not least, conversion to and from JSON is automatically supported:
    'Point'
    >>>
 
+
+Installation
+============
+
+The stable releases are uploaded to `PyPI <https://pypi.python.org>`_, so you
+can install them and upgrade using ``pip``::
+
+   pip install lasso
+
+Alternatively, you can install development versions —at your own risk—
+directly from the Git repository::
+
+   pip install -e git://github.com/aperezdc/lasso-python
+
+
+Documentation
+=============
+
+There us no documentation for now. In the meanwhile, please read the source
+code of the module itself, or even better, that of `projects using the
+module`__.
+
+__ users_
+
+
+Development
+===========
+
+If you want to contribute, please use the usual GitHub workflow:
+
+1. Clone the repository.
+2. Hack on your clone.
+3. Send a pull request for review.
+
+If you do not have programming skills, you can still contribute by `reporting
+issues <https://github.com/aperezdc/lasso-python/issues>`_ that you may
+encounter.
+
+
+Users
+=====
+
+The following projects make use of Lasso |lasso-icon|:
+
+* `intheam-python <https://github.com/aperezdc/intheam-python>`__
+* `pebbletime-python <https://github.com/aperezdc/pebbletime-python>`__
+
+(If you use it, please do not hesitate in editing this file and add a line to
+this list.)
+
