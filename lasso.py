@@ -38,7 +38,7 @@ class JSONable(object):
 class Enum(JSONable, enum.Enum):
     @classmethod
     def validate(cls, data):
-        return cls(data)
+        return data if isinstance(data, cls) else cls(data)
 
     @property
     def jsonable(self):

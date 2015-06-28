@@ -35,6 +35,17 @@ class TestEnum(unittest.TestCase):
         value = Continent.validate("EUROPE")
         self.assertEqual(Continent.EUROPE, value)
 
+    def test_validate_object(self):
+        """
+        Check whether .validate() transparently accepts instances of the Enum
+        as parameters, and returns themselves unmodified.
+        """
+        data = Continent.EUROPE
+        value = Continent.validate(data)
+        self.assertEqual(Continent.EUROPE, value)
+        self.assertIs(value, data)
+        self.assertEqual(value, data)
+
     def test_to_json_with_continent(self):
         """
         Check whether serialization of an Enum value produces the expected
