@@ -423,5 +423,8 @@ class TestFromJSON(unittest.TestCase):
 
 
 def load_tests(loader, tests, ignore):
-    tests.addTests(doctest.DocFileSuite("README.rst"))
+    tests.addTests(doctest.DocFileSuite(
+        "README.rst",
+        "doc/quickstart.rst",
+        optionflags=doctest.REPORT_NDIFF))
     return tests
