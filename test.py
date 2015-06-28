@@ -111,6 +111,30 @@ class TestUUID(unittest.TestCase):
         self.assertIsInstance(value, UUID)
         self.assertEqual(data, value)
 
+    def test_instantiate_uuid1(self):
+        import uuid
+        value = UUID.uuid1()
+        self.assertIsInstance(value, UUID)
+        self.assertIsInstance(value, uuid.UUID)
+
+    def test_instantiate_uuid3(self):
+        import uuid
+        value = UUID.uuid3(UUID.URL, "http://lasso.org")
+        self.assertIsInstance(value, UUID)
+        self.assertIsInstance(value, uuid.UUID)
+
+    def test_instantiate_uuid4(self):
+        import uuid
+        value = UUID.uuid4()
+        self.assertIsInstance(value, UUID)
+        self.assertIsInstance(value, uuid.UUID)
+
+    def test_instantiate_uuid5(self):
+        import uuid
+        value = UUID.uuid5(UUID.URL, "http://lasso.org")
+        self.assertIsInstance(value, UUID)
+        self.assertIsInstance(value, uuid.UUID)
+
 
 class RFC2822Timestamp(Timestamp):
     __format__ = Timestamp.FORMAT_RFC_2822
