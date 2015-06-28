@@ -5,5 +5,5 @@ install:
     - pip install green coverage coveralls
     - pip install -r requirements.txt
 script:
-    - green -v -r -s 8 test
+    - green -r -v -s 8
 after_success: coveralls
