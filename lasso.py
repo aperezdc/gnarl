@@ -7,7 +7,7 @@
 # Distributed under terms of the MIT license.
 
 """
-Lightweight schema-objects.
+Lightweight Annotated Schema Serializable Objects.
 """
 
 from schema import Schema, SchemaError, And, Or, Use, Optional
@@ -18,6 +18,27 @@ import json
 
 
 class LassoJSONEncoder(json.JSONEncoder):
+    """
+    JSON encoder that can encode arbitrary types.
+
+    To make any type (class) serializable, it is enough that it provides a
+    `jsonable` attribute which returns a primitive value that the JSON encoder
+    from the Python standard library (`json.JSONEncoder`) can understand.
+
+    For example, the following defins a ``Timestamp`` class that wraps a
+    `datetime.datetime` object to make it serializable:
+
+    .. code-block:: python
+
+        class Timestamp(object):
+            def __init__(self, dt):
+                self.datetime = dt
+
+            @property
+            def jsonable(self):
+                # Return a 'str'value
+                return self.datetime.isoformat()
+    """
     def default(self, o):
         if hasattr(o, "jsonable"):
             return o.jsonable
@@ -26,15 +47,49 @@ class LassoJSONEncoder(json.JSONEncoder):
 
 
 class JSONable(object):
+    """
+    Mix-in class which adds methods to serialize to/from JSON.
+    """
     def to_json(self, *arg, **kw):
+        """
+        Serializes an object to JSON using `LassoJSONEncoder`.
+
+        Positional and keyword arguments are passed down to the `json.dump()`
+        function from the Python standard library.
+        """
         return json.dumps(self, cls=LassoJSONEncoder, *arg, **kw)
 
     @classmethod
     def from_json(cls, data, encoding=None):
+        """
+        Deserializes an object from JSON and validates it.
+
+        Loads data from a JSON string, decoding it with the `json.loads()`
+        function from the Python standard library, and the resulting value
+        is passed to a `.validate()` class method. This method is responsible
+        to validate the input data, and optionally return an object which
+        represents the deserialized data.
+        """
         return cls.validate(json.loads(data))
 
 
 class Enum(JSONable, enum.Enum):
+    """
+    Provides support for enumeration values as Lasso schema objects.
+
+    The `Enum` class augments the standard `enum.Enum`, providing support to
+    use it as a schema type:
+
+    .. code-block:: python
+
+        class Tristate(lasso.Enum):
+            TRUE      = "#t"
+            FALSE     = "#f"
+            UNDEFINED = "#nil"
+
+        class Checkbox(lasso.Schemed):
+            __schema__ = { "state": Tristate, "label": str }
+    """
     @classmethod
     def validate(cls, data):
         return data if isinstance(data, cls) else cls(data)
