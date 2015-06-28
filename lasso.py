@@ -102,7 +102,12 @@ class UUID(uuid.UUID, JSONable):
 
     @classmethod
     def validate(cls, data):
-        return cls(data)
+        if isinstance(data, cls):
+            return data
+        elif isinstance(data, uuid.UUID):
+            return cls(str(data))
+        else:
+            return cls(data)
 
     @property
     def jsonable(self):

@@ -98,6 +98,19 @@ class TestUUID(unittest.TestCase):
         value = UUID.uuid4()
         self.assertEqual(value, UUID.from_json(value.to_json()))
 
+    def test_validate_object(self):
+        data = UUID.uuid4()
+        value = UUID.validate(data)
+        self.assertIsInstance(value, UUID)
+        self.assertIs(value, data)
+
+    def test_validate_uuid_stdlib_object(self):
+        import uuid
+        data = uuid.uuid4()
+        value = UUID.validate(data)
+        self.assertIsInstance(value, UUID)
+        self.assertEqual(data, value)
+
 
 class RFC2822Timestamp(Timestamp):
     __format__ = Timestamp.FORMAT_RFC_2822
