@@ -111,3 +111,116 @@ deserializing a JSON string and creating objects as needed:
 When deserializing data from JSON, input validation and conversion is done
 exactly in the same way, always following the declared schema.
 
+
+Collections
+===========
+
+Schemas may contain nested lists and dictionaries. Let's change our ``User``
+class to allow multiple e-mail addresses:
+
+   >>> class User(lasso.Schemed):
+   ...     __schema__ = {
+   ...          "name": str,
+   ...          "emails": [str],  # A list of strings.
+   ...     }
+   ...
+   >>> jdoe = User(name="John Doe",
+   ...             emails=["jdoe@spammail.com", "john@doe.org"])
+   ...
+   >>> jdoe.emails
+   ['jdoe@spammail.com', 'john@doe.org']
+
+Dictionaries work as expected, but note that all keys and the types of their
+associated values are fully type-checked:
+
+   >>> class User(lasso.Schemed):
+   ...     __schema__ = { "name": { "first": str, "family": str } }
+   ...
+   >>> jdoe = User(name=dict(first="John", family="Doe"))
+   >>> sorted(jdoe.name.items())
+   [('family', 'Doe'), ('first', 'John')]
+
+
+
+Better Validation
+=================
+
+Remember that e-mail addresses were not being verified for correctness? Lasso
+can automate additional validation for us as well. First, let's define a
+validation function for e-mail addresses:
+
+   >>> def validate_email(email):
+   ...     if "@" not in email:  # Naïve check
+   ...         raise lasso.SchemaError(
+   ...             "{!r} does not contain @".format(email), None)
+   ...     return email
+   ...
+
+The :class:`lasso.Use` helper class can be used to wrap a validation function
+and use it as part of the schema. We still want to ensure that the value is a
+string, and so :class:`lasso.And` is used to instruct the validation engine to
+ensure that the value is a string, *and* that the validation function does not
+raise an error:
+
+   >>> class User(lasso.Schemed):
+   ...     __schema__ = {
+   ...         "name": str,
+   ...         "email": lasso.And(str, lasso.Use(validate_email)),
+   ...     }
+   ...
+
+Now, using an invalid e-mail address will result in an error, even if the
+value is a string:
+
+   >>> jdoe = User(name="John Doe", email="invalid address")
+   Traceback (most recent call last):
+      ...
+   schema.SchemaError: 'invalid address' does not contain @
+
+
+
+Nesting Schemas
+===============
+
+It is possible to use a subclass of :class:`lasso.Schemed` as an schema type
+itself. This allows to construct schemas in which attributes can be themselves
+type-checked objects. In our example, we could define the ``name`` attribute
+to be an object with separate attributes for the surname and the family name:
+
+   >>> class Name(lasso.Schemed):
+   ...     __schema__ = { "first": str, "family": str }
+   ...
+   >>> class User(lasso.Schemed):
+   ...     __schema__ = { "name": Name, "email": str }
+   ...
+
+Instantiating objects gets a little bit more involved, though the way things
+work is still logical:
+
+   >>> jdoe = User(name=Name(first="John", family="Doe"),
+   ...             email="j@doe.org")
+   ...
+
+Serialization of nested schemas works as expected, using nested JSON
+dictionaries for the child objects:
+
+   >>> print(jdoe.to_json(sort_keys=True, indent=4))
+   {
+       "email": "j@doe.org",
+       "name": {
+           "family": "Doe",
+           "first": "John"
+       }
+   }
+
+Loading a JSON snippet also works as expected when using nested schemas:
+
+   >>> monty = User.from_json("""\
+   ... { "email": "monty@spam.org", "name": {
+   ...   "first": "Monty", "family": "Python" }}""")
+   ...
+   >>> isinstance(monty.name, Name)
+   True
+   >>> monty.email, monty.name.first, monty.name.family
+   ('monty@spam.org', 'Monty', 'Python')
+
