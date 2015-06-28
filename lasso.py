@@ -62,10 +62,20 @@ class Timestamp(Delorean, JSONable):
     jsonable = property(__str__)
 
     @classmethod
-    def validate(cls, data):
-        from delorean.interface import parse
-        d = parse(data)
-        return cls(d.datetime, d.timezone)
+    def validate(cls, data, timezone=None):
+        from datetime import datetime
+
+        if isinstance(data, cls):
+            return data
+        elif isinstance(data, datetime):
+            if timezone is None:
+                timezone = "UTC"
+            return cls(data, timezone)
+        else:
+            if not isinstance(data, Delorean):
+                from delorean.interface import parse
+                data = parse(data)
+            return cls(data.datetime, data.timezone)
 
     @classmethod
     def now(cls):

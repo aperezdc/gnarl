@@ -150,6 +150,27 @@ class TestTimestamp(unittest.TestCase):
         self.assertIsInstance(now, RFC2822Date)
         self.assertEqual(now, RFC2822Date.from_json(now.to_json()))
 
+    def test_validate_object(self):
+        data = Timestamp.now()
+        now = Timestamp.validate(data)
+        self.assertIs(now, data)
+        self.assertEqual(now, data)
+
+    def test_validate_datetime_object(self):
+        from datetime import datetime
+        data = datetime.utcnow()
+        now = Timestamp.validate(data)
+        self.assertIsInstance(now, Timestamp)
+        dnow = Timestamp(data, "UTC")
+        self.assertEqual(now, dnow)
+
+    def test_validate_delorean_object(self):
+        from delorean import Delorean
+        data = Delorean()
+        now = Timestamp.validate(data)
+        self.assertIsInstance(now, Timestamp)
+        self.assertEqual(data, now)
+
 
 class TestSchemaShape(unittest.TestCase):
     def test_schema_automatic_creation(self):
