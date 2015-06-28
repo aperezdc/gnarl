@@ -12,7 +12,6 @@ Lightweight schema-objects.
 
 from schema import Schema, SchemaError, And, Or, Use, Optional
 from delorean import Delorean
-import datetime
 import uuid
 import enum
 import json

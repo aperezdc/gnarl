@@ -94,7 +94,6 @@ class TestUUID(unittest.TestCase):
                 r = UUID.validate(u)
 
     def test_json_roundtrip(self):
-        from uuid import uuid4
         value = UUID.uuid4()
         self.assertEqual(value, UUID.from_json(value.to_json()))
 
