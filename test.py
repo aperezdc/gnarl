@@ -7,6 +7,7 @@
 # Distributed under terms of the MIT license.
 
 import unittest
+import doctest
 from lasso import Enum, Schemed, Schema, SchemaError, Optional, UUID, Timestamp
 
 
@@ -419,3 +420,8 @@ class TestFromJSON(unittest.TestCase):
         nv = NestedValue.from_json('{"value": {"value": [4, 5, 6]}}')
         self.assertIsInstance(nv.value, ListValue)
         self.assertListEqual([4, 5, 6], nv.value.value)
+
+
+def load_tests(loader, tests, ignore):
+    tests.addTests(doctest.DocFileSuite("README.rst"))
+    return tests
