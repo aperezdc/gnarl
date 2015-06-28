@@ -95,6 +95,11 @@ class Timestamp(Delorean, JSONable):
 
 
 class UUID(uuid.UUID, JSONable):
+    X500 = uuid.NAMESPACE_X500
+    URL  = uuid.NAMESPACE_URL
+    DNS  = uuid.NAMESPACE_DNS
+    OID  = uuid.NAMESPACE_OID
+
     @classmethod
     def validate(cls, data):
         return cls(data)
