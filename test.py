@@ -172,9 +172,9 @@ class TestTimestamp(unittest.TestCase):
 
     def test_parse_invalid_dates(self):
         for date in self.invalid:
-            with self.assertRaises(ValueError):
+            with self.assertRaises((ValueError, OverflowError)):
                 d = RFC2822Timestamp.validate(date)
-            with self.assertRaises(ValueError):
+            with self.assertRaises((ValueError, OverflowError)):
                 d = RFC2822Date.validate(date)
 
     def test_json_roundtrip_rfc2822timestamp(self):
