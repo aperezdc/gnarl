@@ -42,7 +42,7 @@ class LassoJSONEncoder(json.JSONEncoder):
     def default(self, o):
         if hasattr(o, "jsonable"):
             return o.jsonable
-        else:
+        else:  # pragma: nocover
             return super(JSONEncoder, self).default(o)
 
 

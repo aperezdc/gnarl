@@ -22,7 +22,7 @@ def file_contents(*relpath):
 if __name__ == "__main__":
     setup(
         name="lasso",
-        version="0.0.3",
+        version="0.0.4",
         description=("Lightweight module to define serializable, "
                      "schema-validated classes"),
         long_description=file_contents("README.rst"),
@@ -31,7 +31,7 @@ if __name__ == "__main__":
         url="https://github.com/aperezdc/lasso-python",
         py_modules=["lasso"],
         install_requires=[
-            "schema>=0.3.1",
+            "schema>=0.3.1, <0.4.0",
             "delorean>=0.4.4",
         ],
         license="MIT",
