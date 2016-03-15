@@ -22,7 +22,7 @@ def file_contents(*relpath):
 if __name__ == "__main__":
     setup(
         name="lasso",
-        version="0.0.5",
+        version="0.1.0-alpha.1",
         description=("Lightweight module to define serializable, "
                      "schema-validated classes"),
         long_description=file_contents("README.rst"),
