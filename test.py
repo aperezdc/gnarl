@@ -235,7 +235,7 @@ class TestSchema(unittest.TestCase):
         from collections import OrderedDict
         d = OrderedDict(a=10, b=20)
         v = Schema({"a": 10, "b": 20}).validate(d)
-        self.assertEqual(d, v)
+        self.assertEqual(dict(d), dict(v))
         self.assertIsInstance(v, OrderedDict)
 
     def test_dict_subtype_counter(self):
