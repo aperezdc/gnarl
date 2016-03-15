@@ -3,8 +3,8 @@ python:
     - "3.4"
     - "3.5"
 install:
-    - pip install green coverage coveralls hipack
-    - pip install -r requirements.txt
+    - pip install coverage coveralls
 script:
-    - green -r -v -s 8
+    - coverage run --source=lasso setup.py test -v
+    - coverage report -m
 after_success: coveralls
