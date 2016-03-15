@@ -143,7 +143,7 @@ class Schema(object):
             e = self._error
             if e is None:
                 if exc_format is None:
-                    e = "{!s}{!r}".format(f, data)
+                    e = "{!s}({!r})".format(f, data)
                 else:
                     e = exc_format.format(*exc_args)
                 e += " raised {!r}".format(ex)
