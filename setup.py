@@ -31,8 +31,7 @@ if __name__ == "__main__":
         url="https://github.com/aperezdc/lasso-python",
         py_modules=["lasso"],
         install_requires=[
-            "schema>=0.3.1, <0.4.0",
-            "delorean>=0.4.4",
+            "delorean>=0.5.0",
         ],
         license="MIT",
         classifiers=[

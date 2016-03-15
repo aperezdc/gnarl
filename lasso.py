@@ -10,11 +10,174 @@
 Lightweight Annotated Schema Serializable Objects.
 """
 
-from schema import Schema, SchemaError, And, Or, Use, Optional
+from collections import namedtuple
 from delorean import Delorean
 import uuid
 import enum
 import json
+
+
+def _get_callable_repr(c):
+    return c.__name__ if hasattr(c, "__name__") else repr(c)
+
+
+class SchemaError(Exception):
+    """
+    Error occured during schema validation.
+    """
+    @property
+    def message(self):
+        """Error message."""
+        return self.args[0]
+
+
+_OPTIONAL_NO_DEFAULT_MARK = object()
+class Optional(namedtuple("_Optional", "schema,default")):
+    """
+    Marks an element in a dictionary schema as optional.
+
+    For example, the following creates a schema which validates a dictionary,
+    where the ``name`` key is optional, and the ``
+
+    .. code-block:: python
+
+        Schema({
+            "login": str,
+            "name": Optional(str),
+            "age": Optional(int, default=0),
+        })
+    """
+    __slots__ = ()
+
+    def __new__(cls, schema, default=_OPTIONAL_NO_DEFAULT_MARK):
+        return super(Optional, cls).__new__(cls, schema, default)
+
+
+class And(namedtuple("_And", "args,error")):
+    __slots__ = ()
+
+    def __new__(cls, *args, error=None):
+        return super(And, cls).__new__(cls, args, error)
+
+    def __repr__(self):
+        return "{!s}({!s})".format(self.__class__.__name__,
+                ", ".join(repr(a) for a in self.args))
+
+    def validate(self, data):
+        for s in (Schema(s, self.error) for s in self.args):
+            data = s.validate(data)
+        return data
+
+
+class Or(And):
+    __slots__ = ()
+
+    def validate(self, data):
+        for s in (Schema(s, self.error) for s in self.args):
+            try:
+                return s.validate(data)
+            except SchemaError as ex:
+                pass
+        raise SchemaError(self.error if self.error is not None
+                else "{!r} did not validate {!r}".format(data, self))
+
+
+class Use(namedtuple("_Use", "func,error")):
+    __slots__ = ()
+
+    def __new__(cls, func, error=None):
+        assert callable(func)
+        return super(Use, cls).__new__(cls, func, error)
+
+    def __repr__(self):
+        return "{!s}({!r})".format(self.__class__.__name__, self.func)
+
+    def validate(self, data):
+        try:
+            return self.func(data)
+        except SchemaError as ex:
+            raise ex if self.error is None else SchemaError(self.error)
+        except BaseException as ex:
+            f = _get_callable_repr(self.func)
+            raise SchemaError(self.error if self.error is not None
+                    else "{!s}({!r}) raised {!r}".format(f, data, ex))
+
+
+class Schema(object):
+    __slots__ = ("_schema", "_error")
+
+    def __init__(self, schema, error=None):
+        self._schema = schema
+        self._error = error
+
+    def __repr__(self):
+        return "{!s}({!r})".format(self.__class__.__name__, self._schema)
+
+    def __pcall(self, f, data, exc_format=None, *exc_args):
+        try:
+            return f(data)
+        except BaseException as ex:
+            e = self._error
+            if e is None:
+                if exc_format is None:
+                    e = "{!s}{!r}".format(f, data)
+                else:
+                    e = exc_format.format(*exc_args)
+                e += " raised {!r}".format(ex)
+            raise SchemaError(e)
+
+    def validate(self, data):
+        s = self._schema
+        e = self._error
+        if callable(getattr(s, "validate", None)):
+            return self.__pcall(s.validate, data, "{!r}.validate({!r})", s, data)
+        if isinstance(s, (list, tuple, set, frozenset)):
+            data = Schema(type(s), e).validate(data)
+            o = Or(*s, error=e)
+            return type(data)(o.validate(d) for d in data)
+        if isinstance(s, dict):
+            data = Schema(dict, e).validate(data)
+            new = type(data)()
+            seen = set()
+            for k, v in s.items():
+                if type(v) is Optional:
+                    if k in data:
+                        new[k] = Schema(v.schema, e).validate(data[k])
+                        seen.add(k)
+                elif k in data:
+                    new[k] = Schema(v, e).validate(data[k])
+                    seen.add(k)
+            required = set(k for k, v in s.items() if type(v) is not Optional)
+            if not required.issubset(seen):
+                missing = ", ".join(repr(k) for k in sorted(required - seen))
+                raise SchemaError("Missing keys: " + missing)
+            extra = data.keys() - s.keys()
+            if len(extra):
+                extra = ", ".join(repr(k) for k in sorted(extra))
+                raise SchemaError("Wrong keys in {!r}: {!s}".format(data, extra))
+            # Apply optionals with default values
+            defaults = set(k for k, v in s.items() if type(v) is Optional
+                    and v.default is not _OPTIONAL_NO_DEFAULT_MARK) - seen
+            for k in defaults:
+                new[k] = s[k].default
+            return new
+        if issubclass(type(s), type):
+            if isinstance(data, s):
+                return data
+            else:
+                raise SchemaError(e if e is not None else
+                        "{!r} should be instance of {!r}".format(data, s))
+        if callable(s):
+            if self.__pcall(s, data):
+                return data
+            raise SchemaError(e if e is not None
+                    else "{!s}({!r}) should evaluate to True".format(
+                        _get_callable_repr(s), data))
+        if s == data:
+            return data
+        else:
+            raise SchemaError(e if e is not None else
+                    "{!r} should be {!r}".format(data, s))
 
 
 class LassoJSONEncoder(json.JSONEncoder):

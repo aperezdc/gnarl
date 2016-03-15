@@ -8,8 +8,255 @@
 
 import unittest
 import doctest
-from lasso import Enum, Schemed, Schema, SchemaError, Optional, UUID, Timestamp
+from lasso import Enum, Schemed, Optional, UUID, Timestamp
+from lasso import Schema, SchemaError, And, Or, Use
 
+
+class TestSchema(unittest.TestCase):
+    simple_values = (
+        1,
+        1.5,
+        "a string",
+        ("a", "tuple"),
+        ["a", "list"],
+        {"a": "dict"},
+    )
+    def test_simple_values(self):
+        for value in self.simple_values:
+            self.assertEqual(value, Schema(value).validate(value))
+
+    type_schemas = (
+        (int, 1),
+        (float, 1.2),
+        (str, "a string"),
+        (tuple, ("a", "tuple")),
+        (list, ["a", "list"]),
+        (dict, {"a": "dict"}),
+    )
+    def test_type_schemas(self):
+        for s, value in self.type_schemas:
+            self.assertEqual(value, Schema(s).validate(value))
+
+    use_type_schemas = (
+        (int,
+            (1, 1),
+            (1, "1")),
+        (float,
+            (1, 1),
+            (1.1, 1.1),
+            (1, "1"),
+            (1.2, "1.2")),
+        (str,
+            ("1", 1),
+            ("1.2", 1.2)),
+        (list,
+            ([1, 2], (1, 2))),
+    )
+    def test_use_type_schemas(self):
+        for item in self.use_type_schemas:
+            s = Use(item[0])
+            for expected, data in item[1:]:
+                self.assertEqual(expected, Schema(s).validate(data))
+
+    invalid_type_schemas = (
+        (int, "1", {}, (), [], 2.1, object()),
+        (float, "1", {}, (), [], 1, object()),
+        (str, 1.1, {}, (), [], 1, object()),
+        (list, 1.1, {}, (), "1", 1, object()),
+        (dict, 1.1, [], (), "1", 1, object()),
+        (tuple, 1.1, [], {}, "1", 1, object()),
+    )
+    def test_invalid_type_schemas(self):
+        for item in self.invalid_type_schemas:
+            for data in item[1:]:
+                with self.assertRaises(SchemaError):
+                    Schema(item[0]).validate(data)
+
+    invalid_use_type_schemas = (int, float, list, tuple, dict)
+    def test_invalid_use_type_schemas(self):
+        for item in self.invalid_use_type_schemas:
+            with self.assertRaises(SchemaError):
+                Schema(Use(item)).validate(object())
+
+    def test_callable_schema(self):
+        self.assertEqual(6, Schema(lambda x: 4 < x < 8).validate(6))
+
+    def test_callable_raise(self):
+        with self.assertRaises(SchemaError):
+            Schema(lambda x: 4 < x < 8).validate(0)
+
+    def test_callable_raise_error_message(self):
+        try:
+            Schema(lambda x: 4 < x < 8, "error message").validate(2)
+        except SchemaError as ex:
+            self.assertEqual("error message", ex.message)
+        else:
+            self.fail("SchemaError was not raised")
+
+    def test_and(self):
+        self.assertEqual(3, And(int, lambda x: 0 < x < 5).validate(3))
+        self.assertEqual(3, And(Use(int), lambda x: 0 < x < 5).validate("3"))
+        with self.assertRaises(SchemaError):
+            And(int, lambda x: 0 < x < 5).validate(-1)
+        with self.assertRaises(SchemaError):
+            And(Use(int), lambda x: 0 < x < 5).validate("-1")
+
+    def test_or(self):
+        self.assertEqual(2, Or(int).validate(2))
+        self.assertEqual(5, Or(int, dict).validate(5))
+        self.assertEqual({}, Or(int, dict).validate({}))
+        with self.assertRaises(SchemaError):
+            Or(int, dict).validate("a string")
+        with self.assertRaises(SchemaError):
+            Or().validate(2)
+
+    def test_validate_list(self):
+        self.assertEqual([1, 0, 1, 1],
+                Schema([0, 1]).validate([1, 0, 1, 1]))
+        self.assertEqual([],
+                Schema([0, 1]).validate([]))
+        self.assertEqual([0, 1, 0],
+                And([1, 0], lambda l: len(l) > 2).validate([0, 1, 0]))
+        with self.assertRaises(SchemaError):
+            Schema([1, 0]).validate(0)
+        with self.assertRaises(SchemaError):
+            Schema([1, 0]).validate([2])
+        with self.assertRaises(SchemaError):
+            And([1, 0], lambda l: len(l) > 2).validate([0, 1])
+
+    def test_validate_tuple(self):
+        self.assertEqual((1, 0, 0, 1),
+                Schema((0, 1)).validate((1, 0, 0, 1)))
+        self.assertEqual((), Schema((0, 1)).validate(()))
+        self.assertEqual((0, 1, 0),
+                And((0, 1), lambda l: len(l) > 2).validate((0, 1, 0)))
+        with self.assertRaises(SchemaError):
+            Schema((0, 1)).validate(0)
+        with self.assertRaises(SchemaError):
+            Schema((0, 1)).validate((2,))
+        with self.assertRaises(SchemaError):
+            And((1, 0), lambda l: len(l) > 2).validate((0, 1))
+
+    def test_validate_set(self):
+        self.assertEqual(set(), Schema({0, 1}).validate(set()))
+        self.assertEqual({1, 0}, Schema({0, 1}).validate({0, 1, 1}))
+        self.assertEqual({1}, Schema({0, 1}).validate({1}))
+        with self.assertRaises(SchemaError):
+            Schema({0, 1}).validate(0)
+        with self.assertRaises(SchemaError):
+            Schema({0, 1}).validate({2})
+        with self.assertRaises(SchemaError):
+            And({0, 1}, lambda l: len(l) > 2).validate({0})
+
+    def test_use_raise_schema_error(self):
+        def f(data):
+            raise SchemaError("blergh")
+        try:
+            Schema(Use(f)).validate(1)
+        except SchemaError as ex:
+            self.assertTrue("blergh" in str(ex))
+        else:
+            self.fail("Exception not raised")
+
+    def test_validate_method_failed(self):
+        class Foo(object):
+            @classmethod
+            def validate(cls, data):
+                raise SchemaError("blergh")
+        with self.assertRaises(SchemaError):
+            Schema(Foo).validate(1)
+
+    def test_validate_method(self):
+        class Foo(object):
+            @classmethod
+            def validate(cls, data):
+                if data == "yup":
+                    return cls()
+                else:
+                    raise ValueError(data)
+
+        self.assertIsInstance(Schema(Foo).validate("yup"), Foo)
+        with self.assertRaises(SchemaError):
+            Schema(Foo).validate("blargh")
+
+    def test_validate_error_message(self):
+        try:
+            Schema(int, error="That was funky").validate(1.1)
+        except SchemaError as ex:
+            self.assertEqual("That was funky", ex.message)
+
+    def test_nested_schema(self):
+        s = Schema({ "value": Schema(int) })
+        self.assertEqual({ "value": 4 }, s.validate({ "value": 4 }))
+        with self.assertRaises(SchemaError):
+            s.validate({ "value": "invalid value" })
+
+    def test_optional_default_value(self):
+        s = Schema({ "value": Optional(int, default=42) })
+        self.assertEqual({ "value": 42 }, s.validate({}))
+        self.assertEqual({ "value": 10 }, s.validate({ "value": 10 }))
+
+    @unittest.skip("Generic key types are unsupported")
+    def test_dict_generic_key_type(self):
+        # A dictionary that maps string to numbers
+        s = Schema({ str: int })
+        self.assertEqual({}, s.validate({}))
+        self.assertEqual({ "a": 1, "b": 2 }).validate({ "a": 1, "b": 2})
+        with self.assertRaises(SchemaError):
+            s.validate({ 1: 1 })     # Wrong key
+        with self.assertRaises(SchemaError):
+            s.validate({ "a": "a" }) # Wrong value
+
+    @unittest.skip("Generic key types are unsupported")
+    def test_dict_concrete_and_generic_key_type(self):
+        s = Schema({ "name": str, int: str })
+        self.assertEqual({ "name": "Peter", 1: "one" },
+                s.validate({ "name": "Peter", 1: "one" }))
+        with self.assertRaises(SchemaError):
+            s.validate({ 1: "one", 2: "two" })     # Missing "name"
+        with self.assertRaises(SchemaError):
+            s.validate({ "name": "Peter", 1: 1})   # Invalid value
+        with self.assertRaises(SchemaError):
+            s.validate({ "name": "Peter", "1": 1}) # Invalid key
+
+    @unittest.skip("Generic key types are unsupported")
+    def test_optional_precedes_type(self):
+        s = Schema({ "a": Optional(int, default=42), str: 22 })
+        self.assertEqual({ "a": 42, "b": 22 }, s.validate({ "b": 22 }))
+
+    def test_dict_subtype_defaultdict(self):
+        from collections import defaultdict
+        d = defaultdict(int, key=1)
+        v = Schema({"key": 1}).validate(d)
+        self.assertEqual(d, v)
+        self.assertIsInstance(v, defaultdict)
+
+    def test_dict_subtype_ordereddict(self):
+        from collections import OrderedDict
+        d = OrderedDict(a=10, b=20)
+        v = Schema({"a": 10, "b": 20}).validate(d)
+        self.assertEqual(d, v)
+        self.assertIsInstance(v, OrderedDict)
+
+    def test_dict_subtype_counter(self):
+        from collections import Counter
+        d = Counter("aaabbbcc")
+        v = Schema({"a": int, "b": int, "c": 2}).validate(d)
+        self.assertEqual(d, v)
+        self.assertIsInstance(v, Counter)
+
+    def test_schema_repr(self):
+        s = Schema([Or(None, And(str, Use(float)))])
+        r = "Schema([Or(None, And(<class 'str'>, Use(<class 'float'>)))])"
+        self.assertEqual(r, repr(s))
+
+    def test_missing_keys_error_message(self):
+        try:
+            Schema({1: "x"}).validate({})
+        except SchemaError as ex:
+            self.assertEqual("Missing keys: 1", ex.message)
+        else:
+            self.fail("SchemaError exception not raised")
 
 class Continent(Enum):
     EUROPE     = "EUROPE"
@@ -246,7 +493,7 @@ class TestSchemed(unittest.TestCase):
         instances are created with the attributes defined.
         """
         class Point(Schemed):
-            __schema__ = { "x": float, "y": float, Optional("z"): float }
+            __schema__ = { "x": float, "y": float, "z": Optional(float) }
 
         origin_2d = Point(x=0.0, y=0.0)
         self.assertFalse(hasattr(origin_2d, "z"))
@@ -287,7 +534,7 @@ class TestSchemed(unittest.TestCase):
 
     def test_set_optional_field(self):
         class Point(Schemed):
-            __schema__ = { "x": float, "y": float, Optional("z"): float }
+            __schema__ = { "x": float, "y": float, "z": Optional(float) }
         value = Point(x=1.1, y=2.2)
         self.assertFalse(hasattr(value, "z"))
         value.z = 3.3
@@ -296,7 +543,7 @@ class TestSchemed(unittest.TestCase):
 
     def test_update(self):
         class Point(Schemed):
-            __schema__ = { "x": float, "y": float, Optional("z"): float }
+            __schema__ = { "x": float, "y": float, "z": Optional(float) }
         value = Point(x=1.1, y=2.2)
 
         # Update using keyword arguments
@@ -372,7 +619,7 @@ class TestSchemed(unittest.TestCase):
 class ListValue(Schemed):
     __schema__ = { "value": [int] }
 class DictValue(Schemed):
-    __schema__ = { "value": { Optional("n"): int } }
+    __schema__ = { "value": { "n": Optional(int) } }
 class NestedValue(Schemed):
     __schema__ = { "value": ListValue }
 
@@ -428,3 +675,6 @@ def load_tests(loader, tests, ignore):
         "doc/quickstart.rst",
         optionflags=doctest.REPORT_NDIFF))
     return tests
+
+if __name__ == "__main__":
+    unittest.main()
