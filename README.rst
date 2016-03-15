@@ -55,7 +55,7 @@ Attributes are type-checked:
    >>> location.x = "invalid value"  # Fails
    Traceback (most recent call last):
       ...
-   schema.SchemaError: 'invalid value' should be instance of <class 'int'>
+   lasso.SchemaError: 'invalid value' should be instance of <class 'int'>
    >>> location.x, location.y  # Values remain unchanged
    (6, 5)
    >>>

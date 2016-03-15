@@ -54,7 +54,7 @@ class:
    >>> jdoe.email
    'jdoe@spammail.com'
    >>> jdoe.created_at
-   Delorean(datetime=1983-05-11 19:35:00+00:00, timezone=UTC)
+   Delorean(datetime=datetime.datetime(1983, 5, 11, 19, 35), timezone='UTC')
 
 The attributes can be modified normally as well:
 
@@ -73,7 +73,7 @@ types to attributes will raise a :class:`SchemaError`:
    >>> jdoe.name = 32
    Traceback (most recent call last):
       ...
-   schema.SchemaError: 32 should be instance of <class 'str'>
+   lasso.SchemaError: 32 should be instance of <class 'str'>
 
 Validation will be also carried on at object instantiation:
 
@@ -81,7 +81,7 @@ Validation will be also carried on at object instantiation:
    ...
    Traceback (most recent call last):
       ...
-   schema.SchemaError: 32 should be instance of <class 'str'>
+   lasso.SchemaError: 32 should be instance of <class 'str'>
 
 
 JSON Serialization
@@ -162,8 +162,7 @@ validation function for e-mail addresses:
 
    >>> def validate_email(email):
    ...     if "@" not in email:  # Naïve check
-   ...         raise lasso.SchemaError(
-   ...             "{!r} does not contain @".format(email), None)
+   ...         raise lasso.SchemaError("{!r} does not contain @".format(email))
    ...     return email
    ...
 
@@ -176,7 +175,7 @@ raise an error:
    >>> class User(lasso.Schemed):
    ...     __schema__ = {
    ...         "name": str,
-   ...         "email": lasso.And(str, lasso.Use(validate_email)),
+   ...         "email": lasso.And(str, validate_email),
    ...     }
    ...
 
@@ -186,7 +185,7 @@ value is a string:
    >>> jdoe = User(name="John Doe", email="invalid address")
    Traceback (most recent call last):
       ...
-   schema.SchemaError: 'invalid address' does not contain @
+   lasso.SchemaError: 'invalid address' does not contain @
 
 
 
