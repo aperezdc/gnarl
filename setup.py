@@ -33,6 +33,9 @@ if __name__ == "__main__":
         install_requires=[
             "delorean>=0.5.0",
         ],
+        extras_require={
+            "hipack": ["hipack>=12"],
+        },
         license="MIT",
         classifiers=[
             "Development Status :: 3 - Alpha",
@@ -43,4 +46,5 @@ if __name__ == "__main__":
             "Operating System :: OS Independent"
         ],
         test_suite="test",
+        tests_require=["hipack>=12"],
     )

@@ -302,6 +302,14 @@ class TestEnum(unittest.TestCase):
         value = WithContinent(continent=Continent.EUROPE)
         self.assertEqual('{"continent": "EUROPE"}', value.to_json())
 
+    def test_to_hipack_with_continent(self):
+        """
+        Check whether serialization of an Enum value produces the expected
+        HiPack output.
+        """
+        value = WithContinent(continent=Continent.EUROPE)
+        self.assertEqual(b'continent:"EUROPE"', value.to_hipack().strip())
+
     def test_to_json(self):
         """
         Check whether an enum can be properly serialized.
@@ -316,6 +324,15 @@ class TestEnum(unittest.TestCase):
         value = WithContinent(continent=Continent.EUROPE)
         json = value.to_json()
         self.assertEqual(value, WithContinent.from_json(json))
+
+    def test_hipack_roundtrip(self):
+        """
+        Check whether an object with enums serializes properly to HiPack and
+        can be deserialized back.
+        """
+        value = WithContinent(continent=Continent.EUROPE)
+        hipack = value.to_hipack()
+        self.assertEqual(value, WithContinent.from_hipack(hipack))
 
 
 class TestUUID(unittest.TestCase):
@@ -667,6 +684,52 @@ class TestFromJSON(unittest.TestCase):
         nv = NestedValue.from_json('{"value": {"value": [4, 5, 6]}}')
         self.assertIsInstance(nv.value, ListValue)
         self.assertListEqual([4, 5, 6], nv.value.value)
+
+
+class TestToHiPack(unittest.TestCase):
+    def test_empty_list(self):
+        lv = ListValue(value=[])
+        self.assertIsInstance(lv.value, list)
+        self.assertEqual(b'value:[]', lv.to_hipack().strip())
+
+    def test_list(self):
+        lv = ListValue(value=[1, 2, 3])
+        self.assertEqual(b'value:[1,2,3,]', lv.to_hipack().strip())
+
+    def test_empty_dict(self):
+        dv = DictValue(value={})
+        self.assertEqual(b'value:{}', dv.to_hipack().strip())
+
+    def test_dict(self):
+        dv = DictValue(value={"n": 42})
+        self.assertEqual(b'value:{n:42 }', dv.to_hipack().strip())
+
+    def test_nested(self):
+        nv = NestedValue(value=ListValue(value=[1, 2, 3]))
+        self.assertEqual(b'value:{value:[1,2,3,] }', nv.to_hipack().strip())
+
+
+class TestFromHiPack(unittest.TestCase):
+    def test_empty_list(self):
+        lv = ListValue.from_hipack("value:[]")
+        self.assertEqual([], lv.value)
+
+    def test_list(self):
+        lv = ListValue.from_hipack("value:[1, 2, 3]")
+        self.assertEqual([1, 2, 3], lv.value)
+
+    def test_empty_dict(self):
+        dv = DictValue.from_hipack("value:{}")
+        self.assertEqual({}, dv.value)
+
+    def test_dict(self):
+        dv = DictValue.from_hipack("value:{n:121}")
+        self.assertEqual({ "n": 121 }, dv.value)
+
+    def test_nested(self):
+        nv = NestedValue.from_hipack("value:{value:[4,5,6]}")
+        self.assertIsInstance(nv.value, ListValue)
+        self.assertEqual([4, 5, 6], nv.value.value)
 
 
 def load_tests(loader, tests, ignore):

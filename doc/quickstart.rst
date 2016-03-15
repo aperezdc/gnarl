@@ -112,6 +112,17 @@ When deserializing data from JSON, input validation and conversion is done
 exactly in the same way, always following the declared schema.
 
 
+HiPack Serialization
+====================
+
+If you have the `hipack module <https://pypi.python.org/pypi/hipack>`__
+installed (it is an optional dependency, Lasso will work just fine without
+it), it is also possible to serialize objects to `HiPack
+<http://hipack.org>`__, using the :func:`Schemed.to_hipack()` method.
+Deserialization and validation can be done using the
+:func:`Schemed.from_hipack()` class method.
+
+
 Collections
 ===========
 

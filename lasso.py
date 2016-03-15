@@ -235,6 +235,33 @@ class JSONable(object):
         """
         return cls.validate(json.loads(data))
 
+    @staticmethod
+    def __to_hipack_serializable(o):
+        return (o.jsonable if hasattr(o, "jsonable") else o, None)
+
+    def to_hipack(self, indent=False):
+        """
+        Serializes an object to HiPack.
+
+        The `indent` argument is passed to `hipack.dumps()`.
+        """
+        from hipack import dumps
+        return dumps(self, indent=indent, value=self.__to_hipack_serializable)
+
+    @classmethod
+    def from_hipack(cls, data, encoding=None):
+        """
+        Deserializes an object from HiPack and validates it.
+
+        Loads data from a HiPack string, decoding it with `hipack.loads()`,
+        and the resulting value is passed to a `.validate()` class method.
+        That method is responsible of validating the input date, and
+        optionally returning an object which represents the deserialized
+        data.
+        """
+        from hipack import loads
+        return cls.validate(loads(data))
+
 
 class Enum(JSONable, enum.Enum):
     """
