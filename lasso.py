@@ -116,6 +116,8 @@ class Schema(object):
     def __pcall(self, f, data, exc_format=None, *exc_args):
         try:
             return f(data)
+        except SchemaError as ex:
+            raise ex if self._error is None else SchemaError(self._error)
         except BaseException as ex:
             e = self._error
             if e is None:
