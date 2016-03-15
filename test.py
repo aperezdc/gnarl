@@ -9,7 +9,7 @@
 import unittest
 import doctest
 from lasso import Enum, Schemed, Optional, UUID, Timestamp
-from lasso import Schema, SchemaError, And, Or, Use
+from lasso import Schema, SchemaError, And, Or, Use, StringMatch
 
 
 class TestSchema(unittest.TestCase):
@@ -257,6 +257,35 @@ class TestSchema(unittest.TestCase):
             self.assertEqual("Missing keys: 1", ex.message)
         else:
             self.fail("SchemaError exception not raised")
+
+
+class TestStringMatch(unittest.TestCase):
+    def test_match(self):
+        m = StringMatch(r"[a-z][a-z_]+")
+        self.assertEqual("abc", m.validate("abc"))
+        self.assertEqual("a_b", m.validate("a_b"))
+
+    def test_no_string(self):
+        with self.assertRaises(SchemaError):
+            StringMatch(r"[a-z][a-z_]+").validate(0)
+
+    def test_no_match(self):
+        with self.assertRaises(SchemaError):
+            StringMatch(r"[a-z][a-z_]+").validate("0")
+
+    def test_nested_match(self):
+        s = Schema({"uid": StringMatch(r"[a-z][a-z_]+")})
+        self.assertEqual({ "uid": "jdoe" }, s.validate({ "uid": "jdoe" }))
+
+    def test_nested_no_match(self):
+        with self.assertRaises(SchemaError):
+            Schema({"uid": StringMatch(r"[a-z][a-z_]+")}).validate({ "uid": "_" })
+
+    def test_repr(self):
+        s = StringMatch(r"[a-z][a-z_]+")
+        r = "StringMatch('[a-z][a-z_]+')"
+        self.assertEqual(r, repr(s))
+
 
 class Continent(Enum):
     EUROPE     = "EUROPE"

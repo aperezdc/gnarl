@@ -103,6 +103,27 @@ class Use(namedtuple("_Use", "func,error")):
                     else "{!s}({!r}) raised {!r}".format(f, data, ex))
 
 
+class StringMatch(namedtuple("_StringMatch", "regex,error")):
+    __slots__ = ()
+
+    def __new__(cls, pattern, error=None, *arg, **kw):
+        from re import compile as re_compile
+        return super(StringMatch, cls).__new__(cls, re_compile(pattern, *arg, **kw), error)
+
+    def __repr__(self):
+        return "{!s}({!r})".format(self.__class__.__name__, self.regex.pattern)
+
+    def validate(self, data):
+        if isinstance(data, str):
+            if self.regex.match(data):
+                return data
+            raise SchemaError(self.error if self.error is not None else
+                    "{!r} does not match regex {!r}".format(data, self.regex.pattern))
+        else:
+            raise SchemaError(self.error if self.error is not None else
+                    "{!r} is not a string".format(data))
+
+
 class Schema(object):
     __slots__ = ("_schema", "_error")
 
