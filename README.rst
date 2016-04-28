@@ -3,7 +3,7 @@
 ===================================================
 
 .. image:: https://readthedocs.org/projects/lasso/badge/?version=latest
-   :target: https://lasso.readthedocs.org/en/latest
+   :target: https://lasso.readthedocs.io/en/latest
    :alt: Documentation Status
 
 .. image:: https://img.shields.io/travis/aperezdc/lasso-python.svg?style=flat
@@ -90,7 +90,7 @@ Documentation
 
 The documentation for Lasso |lasso-icon| is available at:
 
-  http://lasso.readthedocs.org/en/latest
+  http://lasso.readthedocs.io/en/latest
 
 Note that the documentation is work in progress. In the meanwhile, you may
 want to read the source code of the module itself for additional insight,

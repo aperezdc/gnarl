@@ -35,7 +35,7 @@ Object Instantiation
 We can instantiate ``User`` normally, as long as the parameters to the
 constructor are given as keyword arguments. The timestamp can be passed as a
 string, and it will be parsed using the
-`Delorean <http://delorean.readthedocs.org/en/latest/>`_ module:
+`Delorean <http://delorean.readthedocs.io/en/latest/>`_ module:
 
    >>> jdoe = User(name="John Doe", email="jdoe@spammail.com",
    ...            created_at="1983-05-11 19:35:00 +0000")
