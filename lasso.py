@@ -341,7 +341,7 @@ class Timestamp(Delorean, JSONable):
         else:
             if not isinstance(data, Delorean):
                 from delorean.interface import parse
-                data = parse(data)
+                data = parse(data, dayfirst=False)
             return cls(data.datetime, data.timezone)
 
     @classmethod
