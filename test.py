@@ -8,8 +8,8 @@
 
 import unittest
 import doctest
-from lasso import Enum, Schemed, Optional, UUID, Timestamp
-from lasso import Schema, SchemaError, And, Or, Use, StringMatch
+from gnarl import Enum, Schemed, Optional, UUID, Timestamp
+from gnarl import Schema, SchemaError, And, Or, Use, StringMatch
 
 
 class TestSchema(unittest.TestCase):
@@ -412,7 +412,7 @@ class TestUUID(unittest.TestCase):
 
     def test_instantiate_uuid3(self):
         import uuid
-        value = UUID.uuid3(UUID.URL, "http://lasso.org")
+        value = UUID.uuid3(UUID.URL, "http://gnarl.org")
         self.assertIsInstance(value, UUID)
         self.assertIsInstance(value, uuid.UUID)
 
@@ -424,7 +424,7 @@ class TestUUID(unittest.TestCase):
 
     def test_instantiate_uuid5(self):
         import uuid
-        value = UUID.uuid5(UUID.URL, "http://lasso.org")
+        value = UUID.uuid5(UUID.URL, "http://gnarl.org")
         self.assertIsInstance(value, UUID)
         self.assertIsInstance(value, uuid.UUID)
 

@@ -2,25 +2,25 @@
  Lightweight Annotated Schema Serializable Objects
 ===================================================
 
-.. image:: https://readthedocs.org/projects/lasso/badge/?version=latest
-   :target: https://lasso.readthedocs.io/en/latest
+.. image:: https://readthedocs.org/projects/gnarl/badge/?version=latest
+   :target: https://gnarl.readthedocs.io/en/latest
    :alt: Documentation Status
 
-.. image:: https://img.shields.io/travis/aperezdc/lasso-python.svg?style=flat
-   :target: https://travis-ci.org/aperezdc/lasso-python
+.. image:: https://img.shields.io/travis/aperezdc/gnarl.svg?style=flat
+   :target: https://travis-ci.org/aperezdc/gnarl
    :alt: Build Status
 
-.. image:: https://img.shields.io/coveralls/aperezdc/lasso-python/master.svg?style=flat
-   :target: https://coveralls.io/r/aperezdc/lasso-python?branch=master
+.. image:: https://img.shields.io/coveralls/aperezdc/gnarl/master.svg?style=flat
+   :target: https://coveralls.io/r/aperezdc/gnarl?branch=master
    :alt: Code Coverage
 
-.. |lasso-icon| image:: http://tango.freedesktop.org/static/cvs/tango-art-libre/22x22/tools/select-lasso.png
+.. |knot-icon| image:: https://github.com/aperezdc/gnarl/raw/master/doc/knot.png
 
-Lasso |lasso-icon| is a small module for `Python <http://python.org>`_ which
+Gnarl |knot-icon| is a small module for `Python <http://python.org>`_ which
 allows defining classes with type-checked attributes, conforming to a
 predetermined schema.
 
-Classes with Lasso |lasso-icon| schemas can be used to:
+Classes with Gnarl |knot-icon| schemas can be used to:
 
 * **Type-check** object attributes.
 * **Validate** input data.
@@ -35,7 +35,7 @@ Usage
 Define a class, with a schema attached to it used to type-check the
 attributes:
 
-   >>> from lasso import Schemed
+   >>> from gnarl import Schemed
    >>> class Point(Schemed):
    ...   __schema__ = { "x": int, "y": int }
    ...
@@ -55,7 +55,7 @@ Attributes are type-checked:
    >>> location.x = "invalid value"  # Fails
    Traceback (most recent call last):
       ...
-   lasso.SchemaError: 'invalid value' should be instance of <class 'int'>
+   gnarl.SchemaError: 'invalid value' should be instance of <class 'int'>
    >>> location.x, location.y  # Values remain unchanged
    (6, 5)
    >>>
@@ -77,20 +77,20 @@ Installation
 The stable releases are uploaded to `PyPI <https://pypi.python.org>`_, so you
 can install them and upgrade using ``pip``::
 
-   pip install lasso
+   pip install gnarl
 
 Alternatively, you can install development versions —at your own risk—
 directly from the Git repository::
 
-   pip install -e git://github.com/aperezdc/lasso-python
+   pip install -e git://github.com/aperezdc/gnarl
 
 
 Documentation
 =============
 
-The documentation for Lasso |lasso-icon| is available at:
+The documentation for Gnarl |knot-icon| is available at:
 
-  http://lasso.readthedocs.io/en/latest
+  http://gnarl.readthedocs.io/en/latest
 
 Note that the documentation is work in progress. In the meanwhile, you may
 want to read the source code of the module itself for additional insight,
@@ -109,14 +109,14 @@ If you want to contribute, please use the usual GitHub workflow:
 3. Send a pull request for review.
 
 If you do not have programming skills, you can still contribute by `reporting
-issues <https://github.com/aperezdc/lasso-python/issues>`_ that you may
+issues <https://github.com/aperezdc/gnarl/issues>`_ that you may
 encounter.
 
 
 Users
 =====
 
-The following projects make use of Lasso |lasso-icon|:
+The following projects make use of Gnarl |gnarl-icon|:
 
 * `intheam-python <https://github.com/aperezdc/intheam-python>`__
 * `pebbletime-python <https://github.com/aperezdc/pebbletime-python>`__

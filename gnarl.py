@@ -203,7 +203,7 @@ class Schema(object):
                     "{!r} should be {!r}".format(data, s))
 
 
-class LassoJSONEncoder(json.JSONEncoder):
+class GnarlJSONEncoder(json.JSONEncoder):
     """
     JSON encoder that can encode arbitrary types.
 
@@ -238,12 +238,12 @@ class JSONable(object):
     """
     def to_json(self, *arg, **kw):
         """
-        Serializes an object to JSON using `LassoJSONEncoder`.
+        Serializes an object to JSON using `GnarlJSONEncoder`.
 
         Positional and keyword arguments are passed down to the `json.dump()`
         function from the Python standard library.
         """
-        return json.dumps(self, cls=LassoJSONEncoder, *arg, **kw)
+        return json.dumps(self, cls=GnarlJSONEncoder, *arg, **kw)
 
     @classmethod
     def from_json(cls, data, encoding=None):
@@ -288,19 +288,19 @@ class JSONable(object):
 
 class Enum(JSONable, enum.Enum):
     """
-    Provides support for enumeration values as Lasso schema objects.
+    Provides support for enumeration values as Gnarl schema objects.
 
     The `Enum` class augments the standard `enum.Enum`, providing support to
     use it as a schema type:
 
     .. code-block:: python
 
-        class Tristate(lasso.Enum):
+        class Tristate(gnarl.Enum):
             TRUE      = "#t"
             FALSE     = "#f"
             UNDEFINED = "#nil"
 
-        class Checkbox(lasso.Schemed):
+        class Checkbox(gnarl.Schemed):
             __schema__ = { "state": Tristate, "label": str }
     """
     @classmethod

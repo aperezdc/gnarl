@@ -21,15 +21,15 @@ def file_contents(*relpath):
 
 if __name__ == "__main__":
     setup(
-        name="lasso",
+        name="gnarl",
         version="0.1.0-alpha.3",
         description=("Lightweight module to define serializable, "
                      "schema-validated classes"),
         long_description=file_contents("README.rst"),
         author="Adrián Pérez de Castro",
         author_email="adrian@perezdecastro.org",
-        url="https://github.com/aperezdc/lasso-python",
-        py_modules=["lasso"],
+        url="https://github.com/aperezdc/gnarl",
+        py_modules=["gnarl"],
         install_requires=[
             "delorean>=0.5.0",
         ],

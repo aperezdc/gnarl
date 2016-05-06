@@ -2,7 +2,7 @@
  Quickstart
 ============
 
-This guide will walk you through the basics of creating Lasso schemas.
+This guide will walk you through the basics of creating Gnarl schemas.
 
 
 Declaring Schemas
@@ -11,12 +11,12 @@ Declaring Schemas
 Let's start with a basic “user” model. Inheriting from :class:`Schemed` allows
 to define a schema:
 
-    >>> import lasso
-    >>> class User(lasso.Schemed):
+    >>> import gnarl
+    >>> class User(gnarl.Schemed):
     ...     __schema__ = {
     ...         "name"       : str,
     ...         "email"      : str,  # Not a very thorough validation
-    ...         "created_at" : lasso.Timestamp,
+    ...         "created_at" : gnarl.Timestamp,
     ...     }
     ...     def __repr__(self):
     ...         return "<User name={u.name!r}>".format(u=self)
@@ -73,7 +73,7 @@ types to attributes will raise a :class:`SchemaError`:
    >>> jdoe.name = 32
    Traceback (most recent call last):
       ...
-   lasso.SchemaError: 32 should be instance of <class 'str'>
+   gnarl.SchemaError: 32 should be instance of <class 'str'>
 
 Validation will be also carried on at object instantiation:
 
@@ -81,7 +81,7 @@ Validation will be also carried on at object instantiation:
    ...
    Traceback (most recent call last):
       ...
-   lasso.SchemaError: 32 should be instance of <class 'str'>
+   gnarl.SchemaError: 32 should be instance of <class 'str'>
 
 
 JSON Serialization
@@ -116,7 +116,7 @@ HiPack Serialization
 ====================
 
 If you have the `hipack module <https://pypi.python.org/pypi/hipack>`__
-installed (it is an optional dependency, Lasso will work just fine without
+installed (it is an optional dependency, Gnarl will work just fine without
 it), it is also possible to serialize objects to `HiPack
 <http://hipack.org>`__, using the :func:`Schemed.to_hipack()` method.
 Deserialization and validation can be done using the
@@ -129,7 +129,7 @@ Collections
 Schemas may contain nested lists and dictionaries. Let's change our ``User``
 class to allow multiple e-mail addresses:
 
-   >>> class User(lasso.Schemed):
+   >>> class User(gnarl.Schemed):
    ...     __schema__ = {
    ...          "name": str,
    ...          "emails": [str],  # A list of strings.
@@ -144,7 +144,7 @@ class to allow multiple e-mail addresses:
 Dictionaries work as expected, but note that all keys and the types of their
 associated values are fully type-checked:
 
-   >>> class User(lasso.Schemed):
+   >>> class User(gnarl.Schemed):
    ...     __schema__ = { "name": { "first": str, "family": str } }
    ...
    >>> jdoe = User(name=dict(first="John", family="Doe"))
@@ -156,26 +156,26 @@ associated values are fully type-checked:
 Better Validation
 =================
 
-Remember that e-mail addresses were not being verified for correctness? Lasso
+Remember that e-mail addresses were not being verified for correctness? Gnarl
 can automate additional validation for us as well. First, let's define a
 validation function for e-mail addresses:
 
    >>> def validate_email(email):
    ...     if "@" not in email:  # Naïve check
-   ...         raise lasso.SchemaError("{!r} does not contain @".format(email))
+   ...         raise gnarl.SchemaError("{!r} does not contain @".format(email))
    ...     return email
    ...
 
-The :class:`lasso.Use` helper class can be used to wrap a validation function
+The :class:`gnarl.Use` helper class can be used to wrap a validation function
 and use it as part of the schema. We still want to ensure that the value is a
-string, and so :class:`lasso.And` is used to instruct the validation engine to
+string, and so :class:`gnarl.And` is used to instruct the validation engine to
 ensure that the value is a string, *and* that the validation function does not
 raise an error:
 
-   >>> class User(lasso.Schemed):
+   >>> class User(gnarl.Schemed):
    ...     __schema__ = {
    ...         "name": str,
-   ...         "email": lasso.And(str, validate_email),
+   ...         "email": gnarl.And(str, validate_email),
    ...     }
    ...
 
@@ -185,22 +185,22 @@ value is a string:
    >>> jdoe = User(name="John Doe", email="invalid address")
    Traceback (most recent call last):
       ...
-   lasso.SchemaError: 'invalid address' does not contain @
+   gnarl.SchemaError: 'invalid address' does not contain @
 
 
 
 Nesting Schemas
 ===============
 
-It is possible to use a subclass of :class:`lasso.Schemed` as an schema type
+It is possible to use a subclass of :class:`gnarl.Schemed` as an schema type
 itself. This allows to construct schemas in which attributes can be themselves
 type-checked objects. In our example, we could define the ``name`` attribute
 to be an object with separate attributes for the surname and the family name:
 
-   >>> class Name(lasso.Schemed):
+   >>> class Name(gnarl.Schemed):
    ...     __schema__ = { "first": str, "family": str }
    ...
-   >>> class User(lasso.Schemed):
+   >>> class User(gnarl.Schemed):
    ...     __schema__ = { "name": Name, "email": str }
    ...
 

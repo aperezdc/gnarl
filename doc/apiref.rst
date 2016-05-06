@@ -2,9 +2,9 @@
 API Reference
 =============
 
-:mod:`lasso`
+:mod:`gnarl`
 ============
 
-.. automodule:: lasso
+.. automodule:: gnarl
    :members:
 
