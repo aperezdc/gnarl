@@ -5,6 +5,6 @@ python:
 install:
     - pip install coverage coveralls
 script:
-    - coverage run --source=lasso setup.py test -v
+    - coverage run --source=gnarl setup.py test -v
     - coverage report -m
 after_success: coveralls
