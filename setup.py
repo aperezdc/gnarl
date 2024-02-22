@@ -14,7 +14,7 @@ import sys
 
 
 def file_contents(*relpath):
-    with open(path.join(path.dirname(__file__), *relpath), "rU",
+    with open(path.join(path.dirname(__file__), *relpath), "r",
             encoding="utf-8") as f:
         return f.read()
 
