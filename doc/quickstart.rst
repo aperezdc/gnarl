@@ -46,7 +46,7 @@ string, and it will be parsed using the
 Note how the attributes declared in the schema are available using the normal
 attribute syntax; the timestamp has been converted automatically into an
 instance of the `Delorean
-<http://delorean.readthedocs.org/en/latest/interface.html#module-delorean.dates>`_
+<http://delorean.readthedocs.org/en/latest/interface.html#module-delorean.dates>`__
 class:
 
    >>> jdoe.name
