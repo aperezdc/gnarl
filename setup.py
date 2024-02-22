@@ -34,7 +34,7 @@ if __name__ == "__main__":
             "delorean>=0.5.0",
         ],
         extras_require={
-            "hipack": ["hipack>=12"],
+            "hipack": ["hipack>=14"],
         },
         license="MIT",
         classifiers=[
