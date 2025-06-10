@@ -16,6 +16,8 @@ idna==3.7
     # via requests
 imagesize==1.4.1
     # via sphinx
+importlib-metadata==8.7.0
+    # via sphinx
 jinja2==3.1.5
     # via sphinx
 markupsafe==2.1.5
@@ -26,7 +28,7 @@ pygments==2.18.0
     # via sphinx
 readthedocs-sphinx-search==0.3.2
     # via -r requirements.in
-requests==2.32.3
+requests==2.32.4
     # via sphinx
 snowballstemmer==2.2.0
     # via sphinx
@@ -51,5 +53,9 @@ sphinxcontrib-qthelp==1.0.7
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.10
     # via sphinx
+tomli==2.2.1
+    # via sphinx
 urllib3==2.2.2
     # via requests
+zipp==3.23.0
+    # via importlib-metadata
